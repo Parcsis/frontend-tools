@@ -18,12 +18,12 @@
 			this.grid = null; // DOM-элемент сетки
 			this.gridStyles = null; // DOM-элемент стилей сетки
 
-			this.options = options || {};
+			this.options = options = options || {};
+			
+			options.stepX = options.stepX || 10;
+			options.stepY = options.stepY || 10;
 
 			this.initialize();
-			
-			this.stepX=options.stepX || 10;
-			this.stepY=options.stepY || 10;
 		};
 
 		Grid.prototype={
@@ -91,11 +91,11 @@
 					g.clearRect(0, 0, this.grid.height, this.width);
 					g.beginPath();
 
-					for(var x = this.coords.x % this.stepX; x <= this.grid.width; x += this.stepX){
+					for (var x = this.coords.x % this.options.stepX + 0.5; x <= this.grid.width; x += this.options.stepX) {
 						g.moveTo(x, 0);
 						g.lineTo(x, this.grid.height);
 					}
-					for(var y = this.coords.y % this.stepY; y <= this.grid.height; y += this.stepY){
+					for (var y = this.coords.y % this.options.stepY + 0.5; y <= this.grid.height; y += this.options.stepY) {
 						g.moveTo(0, y);
 						g.lineTo(this.grid.width, y);
 					}
@@ -153,6 +153,21 @@
 						$.detachEventHandler(document, 'keydown', arguments.callee);
 					}
 				}, this);
+				var self = this,
+					x = 0, y = 0;
+				function move(event){
+					self.coords.x += event.clientX - x;
+					self.coords.y += event.clientY - y;
+					x = event.clientX;
+					y = event.clientY;
+					self.redrawGrid();
+				}
+				$.attachEventHandler(document, 'mousedown', function(){
+					$.attachEventHandler(document,'mousemove', move);
+				});
+				$.attachEventHandler(document, 'mouseup', function(){
+					$.detachEventHandler(document,'mousemove', move);
+				});
 
 				return this;
 			},
@@ -219,7 +234,7 @@
 	/**
 	 * Наш собственный ручной "jQuery" с блекджеком и маркитантками
 	 */
-	var $ = false ? {} : function() {
+	var $ = function() {
 
 		/**
 		 * Применяет контекст к методу
