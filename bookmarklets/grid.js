@@ -22,6 +22,8 @@
 			
 			options.stepX = options.stepX || 10;
 			options.stepY = options.stepY || 10;
+			
+			this.alpha=10;
 
 			this.initialize();
 		};
@@ -45,7 +47,10 @@
 				38: 'moveUp',
 				39: 'moveRight',
 				40: 'moveDown',
-				27: 'removeGrid'
+				27: 'removeGrid',
+				61: 'incAlpha',
+				107: 'incAlpha',
+				109: 'decAlpha'
 			},
 
 			/**
@@ -86,7 +91,7 @@
 
 					var g = this.grid.getContext("2d");
 
-					g.strokeStyle = "rgb(0,0,0)";
+					g.strokeStyle = "rgba(0,0,0," + this.alpha * 0.1 + ")";
 					g.lineWidth = 1;
 					g.clearRect(0, 0, this.grid.height, this.width);
 					g.beginPath();
@@ -139,7 +144,7 @@
 			 * Навешивает события на сетку
 			 */
 			bindGrid: function() {
-				$.attachEventHandler(document, 'keydown', function(event) {
+				var handler = $.attachEventHandler(document, 'keydown', function(event) {
 					var keyCode = event.keyCode;
 
 					$.preventDefault(event);
@@ -150,24 +155,27 @@
 
 					// Не могу разобраться почему обработчик на самом деле не детачится
 					if (keyCode == 29) {
-						$.detachEventHandler(document, 'keydown', arguments.callee);
+						handler.detach();
 					}
 				}, this);
 				var self = this,
-					x = 0, y = 0;
+					x = 0, y = 0,
+					listener;
 				function move(event){
-					self.coords.x += event.clientX - x;
-					self.coords.y += event.clientY - y;
+					this.coords.x += event.clientX - x;
+					this.coords.y += event.clientY - y;
 					x = event.clientX;
 					y = event.clientY;
-					self.redrawGrid();
+					this.redrawGrid();
 				}
-				$.attachEventHandler(document, 'mousedown', function(){
-					$.attachEventHandler(document,'mousemove', move);
-				});
+				$.attachEventHandler(document, 'mousedown', function(event){
+					x = event.clientX;
+					y = event.clientY;
+					listener = $.attachEventHandler(document,'mousemove', move, this);
+				},this);
 				$.attachEventHandler(document, 'mouseup', function(){
-					$.detachEventHandler(document,'mousemove', move);
-				});
+					listener.detach();
+				},this);
 
 				return this;
 			},
@@ -222,6 +230,16 @@
 				this.coords.y++;
 				this.redrawGrid();
 			},
+			incAlpha: function(){
+				console.log(this.alpha);
+				this.alpha += (this.alpha < 10);
+				this.redrawGrid();
+			},
+			decAlpha: function(){
+				console.log(this.alpha);
+				this.alpha -= (this.alpha > 0);
+				this.redrawGrid();
+			}
 
 		}
 
@@ -242,10 +260,12 @@
 		 * @param {function(?Object)} method - метод
 		 * @return {Object}
 		 */
-		var _contextOf = function(obj, method) {
-				return function() {
+		var _bind = function(obj, method) {
+				var newMethod = function() {
 					method.apply(obj, arguments);
 				};
+				newMethod.unbind = method;
+				return newMethod;
 			},
 
 			/**
@@ -289,10 +309,11 @@
 			 */
 			attachEventHandler: function(element, eventString, handler, context) {
 				if (typeof context != 'undefined' && context) {
+					handler = _bind(context, handler);
 					if (element.addEventListener) { // W3C DOM
-						element.addEventListener(eventString, _contextOf(context, handler), false);
+						element.addEventListener(eventString, handler, false);
 					} else if (element.attachEvent) {// IE DOM
-						element.attachEvent('on' + eventString, _contextOf(context, handler));
+						element.attachEvent('on' + eventString, handler);
 					}
 				} else {
 					if (element.addEventListener) {// W3C DOM
@@ -301,19 +322,14 @@
 						element.attachEvent('on' + eventString, handler);
 					}
 				}
-			},
-
-			/**
-			 * Удаляет обработчик события с заданного элемента
-			 * @param {!Object} element - элемент-источник события
-			 * @param {string} eventString - имя события
-			 * @param {function(?Object)} handler - обработчик события
-			 */
-			detachEventHandler: function(element, eventString, handler) {
-				if (element.removeEventListener) {
-					element.removeEventListener(eventString, handler, false);
-				} else if (element.detachEvent) {
-					element.detachEvent('on' + eventString, handler);
+				return {
+					detach: function(){
+						if (element.removeEventListener) {
+							element.removeEventListener(eventString, handler, false);
+						} else if (element.detachEvent) {
+							element.detachEvent('on' + eventString, handler);
+						}
+					}
 				}
 			},
 
