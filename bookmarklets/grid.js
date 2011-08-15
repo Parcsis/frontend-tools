@@ -3,7 +3,7 @@
  * по 100 пикселей). Сетка управляемая, можно её двигать и всячески настраивать.
  * 
  * Добавляется на страницу с помощью вот такой ссылки
- * javascript:(function(){_my_script=document.createElement('SCRIPT');_my_script.type='text/javascript';_my_script.src='https://github.com/d-kokin-parc/100by10x10_grid/raw/master/js/100by10x10_grid.js';document.getElementsByTagName('head')[0].appendChild(_my_script);})();
+ * javascript:(function(){_my_script=document.createElement('SCRIPT');_my_script.type='text/javascript';_my_script.src='https://github.com/Parcsis/frontend-tools/raw/master/bookmarklets/grid.js';document.getElementsByTagName('head')[0].appendChild(_my_script);})();void%200;
  */
 ;(function(document, options) {
 
@@ -20,10 +20,13 @@
 
 			this.options = options || {};
 
-			this.initialize.apply(this, [options]);
+			this.initialize();
+			
+			this.stepX=options.stepX || 10;
+			this.stepY=options.stepY || 10;
 		};
 
-		$.extend(Grid.prototype, {
+		Grid.prototype={
 
 			/**
 			 * Координаты сетки
@@ -48,7 +51,7 @@
 			/**
 			 * Конструктор
 			 */
-			initialize: function(options) {
+			initialize: function() {
 				this
 					.addGrid()
 					.bindGrid();
@@ -59,7 +62,7 @@
 			 */
 			addGrid: function() {
 				if (!this.grid) {
-					var gridContainer = document.createElement('div');
+					var gridContainer = document.createElement('canvas');
 
 					gridContainer.className = 'da-grid';
 					documentBody.appendChild(gridContainer);
@@ -77,7 +80,26 @@
 			 */
 			redrawGrid: function() {
 				if (this.grid) {
-					this.grid.style.backgroundPosition = this.coords.x + 'px ' + this.coords.y + 'px';
+					//перед отрисовкой устанавливаем габариты
+					this.grid.height = document.height;
+					this.grid.width = document.width;
+
+					var g = this.grid.getContext("2d");
+
+					g.strokeStyle = "rgb(0,0,0)";
+					g.lineWidth = 1;
+					g.clearRect(0, 0, this.grid.height, this.width);
+					g.beginPath();
+
+					for(var x = this.coords.x % this.stepX; x <= this.grid.width; x += this.stepX){
+						g.moveTo(x, 0);
+						g.lineTo(x, this.grid.height);
+					}
+					for(var y = this.coords.y % this.stepY; y <= this.grid.height; y += this.stepY){
+						g.moveTo(0, y);
+						g.lineTo(this.grid.width, y);
+					}
+					g.stroke();
 				}
 
 				return this;
@@ -186,7 +208,7 @@
 				this.redrawGrid();
 			},
 
-		});
+		}
 
 		return new Grid(container, options);
 
@@ -197,7 +219,7 @@
 	/**
 	 * Наш собственный ручной "jQuery" с блекджеком и маркитантками
 	 */
-	var $ = function() {
+	var $ = false ? {} : function() {
 
 		/**
 		 * Применяет контекст к методу
@@ -310,7 +332,7 @@
 	}();
 
 	// Создадим новый объект сетки
-	return new Grid(documentBody, options);
+	return new Grid(documentBody, options).redrawGrid();
 
 }(document,
 
@@ -319,6 +341,8 @@
 	 */
 	{
 		// Стили для сетки
-		styles: '.da-grid { background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAABBElEQVR42u3XwQ2AIBAEQCrA2KT9d4CoBcAD8BLG5H77usFLNuXjLCbOvCD1S62p3yU3PwcEiBwQIHJAgMgBAWKBv4A8YRNjPpD250UPyPUsGQgQIECAyAEBYtFAgABZDKKpa+r+ECcLiBwQIBYNBAgQIECAaOpGU3ey5IAAsWggQIAAAQIECBBNXVOXc7KAWDQQIECAAAECBAgQTd1o6k6WRQMBAgQIECBAgAABIqepa+rFH+JkAbFoIECAAAECBIgcEE3daOpOlkUDAQIECBAgQOSAAAGiqWvqXr6TBQQIECBAgGyfAwIECBBN3Uxv6l50nBwQIHJAgMgBASIHBIgFrs7diccA287A5QoAAAAASUVORK5CYII=); position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 999 }'
+		stepX: 10,
+		stepY: 15,
+		styles: '.da-grid {position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 999 }'
 	}
 ));
