@@ -23,19 +23,25 @@
 			options.stepX = options.stepX || 10;
 			options.stepY = options.stepY || 10;
 			
-			this.alpha=10;
+			/**
+			 * Координаты сетки
+			 */
+			this.coords = {x:0, y:0};
+			this.alpha = 10;
+			
+			this.handlers=[];
 
 			this.initialize();
 		};
 
-		Grid.prototype={
-
+		Grid.prototype = {
 			/**
-			 * Координаты сетки
+			 * Цепляет обработчик на объект и запоминает его
 			 */
-			coords: {
-				x: 0,
-				y: 0
+			attach: function(){
+				var handler = $.attachEventHandler.apply(this, arguments);
+				this.handlers.push(handler);
+				return handler;
 			},
 
 			/**
@@ -144,7 +150,7 @@
 			 * Навешивает события на сетку
 			 */
 			bindGrid: function() {
-				var handler = $.attachEventHandler(document, 'keydown', function(event) {
+				var handler = this.attach(document, 'keydown', function(event) {
 					var keyCode = event.keyCode;
 
 					$.preventDefault(event);
@@ -158,22 +164,21 @@
 						handler.detach();
 					}
 				}, this);
-				var self = this,
-					x = 0, y = 0,
+				var x = 0, y = 0,
 					listener;
-				function move(event){
+				function move(event) {
 					this.coords.x += event.clientX - x;
 					this.coords.y += event.clientY - y;
 					x = event.clientX;
 					y = event.clientY;
 					this.redrawGrid();
 				}
-				$.attachEventHandler(document, 'mousedown', function(event){
+				this.attach(document, 'mousedown', function(event){
 					x = event.clientX;
 					y = event.clientY;
 					listener = $.attachEventHandler(document,'mousemove', move, this);
 				},this);
-				$.attachEventHandler(document, 'mouseup', function(){
+				this.attach(document, 'mouseup', function(){
 					listener.detach();
 				},this);
 
@@ -189,6 +194,10 @@
 				this.grid && container.removeChild(this.grid);
 
 				this.gridStyles = this.grid = null;
+				
+				for (var h=0; h < this.handlers.length; h++){
+					this.handlers[h].detach();
+				}
 			},
 
 			/**
@@ -230,13 +239,17 @@
 				this.coords.y++;
 				this.redrawGrid();
 			},
-			incAlpha: function(){
-				console.log(this.alpha);
+			/**
+			 * Уменьшает прозрачность
+			 */
+			incAlpha: function() {
 				this.alpha += (this.alpha < 10);
 				this.redrawGrid();
 			},
-			decAlpha: function(){
-				console.log(this.alpha);
+			/**
+			 * Увеличивает прозрачность
+			 */
+			decAlpha: function() {
 				this.alpha -= (this.alpha > 0);
 				this.redrawGrid();
 			}
@@ -329,6 +342,7 @@
 						} else if (element.detachEvent) {
 							element.detachEvent('on' + eventString, handler);
 						}
+						this.detach = function(){};
 					}
 				}
 			},
