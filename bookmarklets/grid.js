@@ -782,10 +782,15 @@ var Zepto = (function() {
 			 */
 			removeGrid: function() {
 				// Чистим DOM и память
+				var doc = $(document);
 				this.gridStyles && this.gridStyles.parentNode.removeChild(this.gridStyles);
 				this.grid && container.removeChild(this.grid);
 
 				this.gridStyles = this.grid = null;
+
+				doc.unbind('keydown');
+				doc.unbind('museup');
+				doc.unbind('mousedown');
 			},
 
 			/**
