@@ -5,14 +5,9 @@
  * Добавляется на страницу с помощью вот такой ссылки
  * javascript:(function(){_my_script=document.createElement('SCRIPT');_my_script.type='text/javascript';_my_script.src='https://github.com/Parcsis/frontend-tools/raw/master/bookmarklets/grid.js';document.getElementsByTagName('head')[0].appendChild(_my_script);})();void%200;
  */
-;(function(document, options) {
+;
+(function(document, options) {
 	var documentBody = document.getElementsByTagName('body')[0];
-	/**
-	 * подключаем canvas для IE
-	 */
-	var script = document.createElement('script');
-	script.setAttribute('src', '../../../excanvas/excanvas.js');
-	documentBody.appendChild(script);
 
 	var preventDefault = function(e) {
 		e = e || win.event;
@@ -21,6 +16,7 @@
 		}
 		e.returnValue = false; // IE
 	}
+
 	/**
 	 * Объект сетки
 	 */
@@ -98,6 +94,9 @@
 
 					this.grid = gridContainer;
 
+					if(window.G_vmlCanvasManager)
+						window.G_vmlCanvasManager.initElement(this.grid);
+
 					this.appendStyles();
 				}
 
@@ -108,11 +107,11 @@
 			 * Перерисовывает сетку
 			 */
 			redrawGrid: function() {
-				if (this.grid) {
+				if (this.grid||true) {
 					//перед отрисовкой устанавливаем габариты
-					this.grid.height = window.innerHeight;
-					this.grid.width = window.innerWidth;
-					
+					this.grid.height = window.innerHeight||document.documentElement.clientHeight||document.body.clientHeight;
+					this.grid.width = window.innerWidth||document.body.clientWidth||document.documentElement.clientWidth;
+
 					var g = this.grid.getContext("2d");
 
 					g.strokeStyle = "rgba(0,0,0," + this.alpha * 0.1 + ")";
@@ -176,13 +175,8 @@
 
 					preventDefault(event);
 
-					if (self.keymap[keyCode] && typeof self[self.keymap[keyCode]] === 'function') {
+					if (typeof self[self.keymap[keyCode]] === 'function') {
 						self[self.keymap[keyCode]]();
-					}
-
-					// Не могу разобраться почему обработчик на самом деле не детачится
-					if (keyCode == 29) {
-						doc.unbind('keydown');
 					}
 					return false;
 				}));
@@ -194,14 +188,17 @@
 						y = event.clientY;
 						self.redrawGrid();
 					}
+					return false;
 				}));
 				this.listeners.push(new Listener(document, 'mousedown', function(event){
 					x = event.clientX;
 					y = event.clientY;
 					pushed = true;
+					return false;
 				}));
 				this.listeners.push(new Listener(document, 'mouseup', function(){
 					pushed = false;
+					return false;
 				}));
 				return this;
 			},
@@ -275,14 +272,31 @@
 				this.alpha -= (this.alpha > 0);
 				this.redrawGrid();
 			}
-
 		}
-
 		return new Grid(container, options);
 
 	};
 
-	return new Grid(documentBody, options);
+	/**
+	 * подключаем canvas для IE
+	 */
+	var script = document.createElement('script');
+	script.setAttribute('type', 'text/javascript');
+	script.setAttribute('charset', 'utf-8');
+	script.setAttribute('src', options.excanvasHref);
+	documentBody.appendChild(script);
+	if (script.readyState) { // IE
+		script.onreadystatechange = function() {
+			var readyState = this.readyState;
+			if (readyState === 'loaded' || readyState === 'complete') {
+				setTimeout(function(){
+					new Grid(documentBody, options);
+				},100);
+			}
+		}
+	} else { // Good browsers
+		new Grid(documentBody, options);
+	}
 
 }(document,
 
@@ -292,6 +306,7 @@
 	{
 		stepX: 10,
 		stepY: 10,
+		excanvasHref:'../../../excanvas/excanvas.js',
 		styles: '.da-grid {position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 999; cursor:move}'
 	}
 ));
