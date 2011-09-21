@@ -202,9 +202,20 @@
 
 			goToPage: function(url) {
 				var functionalPart = url.split('#')[1] || '404',
-					urlArr = functionalPart.split('/');
+					urlArr = functionalPart.split('/'),
+					isLegitRoute = NO;
 
-				if (this.router[urlArr[0]]) {
+				for (var route in this.router.routes) {
+					var method = this.router.routes[route];
+
+					if (this.router.routes.hasOwnProperty(route) && route == urlArr[0]) {
+						if (this.router[method]) {
+							isLegitRoute = YES;
+						}
+					}
+				}
+
+				if (isLegitRoute) {
 					// делаем задержку в одну милисекунду чтоб все обработчики были готовы слушать новое событие
 					setTimeout(function() {
 						this.router.navigate(functionalPart.replace(/^\/+/, ''), YES);
