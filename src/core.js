@@ -327,6 +327,8 @@
 				var data = this.get(name),
 					viewData = $.extend(params, data);
 
+				data.render = this.render.bind(this);
+
 				if (data && ((data._view && !data.standalone) || (data.standalone && !data.view))) {
 					if (data.multiple) {
 						var tmpName = name + Math.floor(Math.random() * 10000),
@@ -361,6 +363,10 @@
 					if (view && (!object.standalone || !!viewName)) {
 						view.remove();
 						delete this['__' + name].view;
+					}
+
+					if (object.eventProxy) {
+						object.eventProxy.unbind();
 					}
 				}.bind(this));
 				this.locationBlock = NO;
