@@ -200,9 +200,10 @@
 				return returnData;
 			},
 
-			goToPage: function(url) {
+			goToPage: function(url, isForceLoad) {
 				var functionalPart = url.split('#')[1] || '404',
 					urlArr = functionalPart.split('/'),
+					requestedUrl = functionalPart.replace(/^\/+/, ''),
 					isLegitRoute = NO;
 
 				for (var route in this.router.routes) {
@@ -218,7 +219,11 @@
 				if (isLegitRoute) {
 					// делаем задержку в одну милисекунду чтоб все обработчики были готовы слушать новое событие
 					setTimeout(function() {
-						this.router.navigate(functionalPart.replace(/^\/+/, ''), YES);
+						this.router.navigate(requestedUrl, YES);
+
+						if (isForceLoad && requestedUrl == Backbone.history.getFragment()) {
+							this.router[urlArr.shift()](urlArr.join('/'));
+						}
 					}.bind(this), 1);
 				}
 				return this;
