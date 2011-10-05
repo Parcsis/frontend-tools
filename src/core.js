@@ -260,6 +260,16 @@
 			list: [],
 			locationBlock: NO,
 
+			createEventProxy: function(dataSource) {
+				var proxy = {};
+
+				_.extend(proxy, Backbone.Events);
+				dataSource.bind('all', function() {
+					proxy.trigger.apply(proxy, arguments);
+				});
+				return proxy;
+			},
+
 			set: function(name, params, render) {
 				params = params || {};
 
@@ -279,7 +289,6 @@
 						'multiple': YES,
 						'eventProxy': YES
 					},
-					proxy = {},
 					undefined;
 
 				if (dataSource) {
@@ -303,11 +312,7 @@
 				}
 
 				if (data.model || data.collection) {
-					_.extend(proxy, Backbone.Events);
-					(data.model || data.collection).bind('all', function() {
-						proxy.trigger.apply(proxy, arguments);
-					});
-					data.eventProxy = proxy;
+					data.eventProxy = this.createEventProxy(data.model || data.collection);
 				}
 
 				if (view) {
