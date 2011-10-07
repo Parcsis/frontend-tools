@@ -51,7 +51,9 @@
 					parameters: regData[2]
 				}
 			},
+
 			Observatory: $({}),
+
 			DateUTC: function(time) {
 				var d = new Date(),
 					date = {},
@@ -121,38 +123,30 @@
 				})(d);
 				return date;
 			},
-			Request: function(params) {
-				params = params || {};
 
-				var url = params.url,
-					method = params.method,
-					data = params.data,
-					success = params.success,
-					error = params.error,
-					abort = params.abort || params.success,
-					cache = params.cache;
+			// Обертка над запросом которая позваляет "продавливать" переданные параметры в объект xhr который приходит в метод parse модели или коллекции.
+			requestWraper: function(target, method, data, params) {
+				if (target && method) {
+					data || (data = {});
+					params || (params = {});
 
-				return $.ajax({
-					url: url + this.getCacheReset(),
-					type: method || 'post',
-					dataType: 'json',
-					cache: cache || NO,
-					data: data || {},
-					success: function(data) {
-						success && success(data);
-					},
-					error: function(data, status) {
-						if (!data.status) {
-							abort && abort({
-								Success: NO,
-								Message: 'Abort'
-							});
-						} else {
-							error && error(data.responseText ? $.parseJSON(data.responseText) : {});
-						}
+					var options = params.options || {},
+						extendData = {},
+						xhr = null;
+
+					target.action = params.action;
+					xhr = target[method].call(target, data, options);
+
+					if (params.appendData) {
+						extendData.sendedData = data;
+						delete params.appendData;
 					}
-				});
+					delete params.options;
+					$.extend(extendData, params);
+					xhr.userData = extendData;
+				}
 			},
+
 			navigate: function(hash, triggerRoute) {
 				!this.locationBlock && this.router.navigate(hash, triggerRoute);
 				return this;
