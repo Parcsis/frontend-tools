@@ -132,10 +132,14 @@
 
 					var options = params.options || {},
 						extendData = {},
-						xhr = null;
+						xhr = null,
+						arguments = [data, options];
 
+					if (method == 'fetch') {
+						arguments.shift();
+					}
 					target.action = params.action;
-					xhr = target[method].call(target, data, options);
+					xhr = target[method].apply(target, arguments);
 
 					if (params.appendData) {
 						extendData.sendedData = data;
