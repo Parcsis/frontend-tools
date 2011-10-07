@@ -126,7 +126,7 @@
 
 			// Обертка над запросом которая позваляет "продавливать" переданные параметры в объект xhr который приходит в метод parse модели или коллекции.
 			requestWraper: function(target, method, data, params) {
-				if (target && method) {
+				if (target && method && target[method] && typeof(target[method]) === 'function') {
 					data || (data = {});
 					params || (params = {});
 
