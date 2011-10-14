@@ -57,7 +57,9 @@
 			DateUTC: function(time) {
 				var d = new Date(),
 					date = {},
-					formatDate = function(d) { return (d < 10 ? '0' + d : d).toString() };
+					formatDate = function(d) {
+						return ('0' + d).slice(-2);
+					};
 
 				time && d.setTime(time);
 				date.HH = (function(d) {
@@ -84,13 +86,7 @@
 				date.MS = (function(d) {
 					var d = d.getUTCMilliseconds();
 
-					if (d < 10) {
-						return '00' + d;
-					} else if (d < 100) {
-						return '0' + d;
-					} else {
-						return d.toString();
-					}
+					return ('00' + d).slice(-3);
 				})(d);
 
 				date.hh = (function(d) {
@@ -124,8 +120,11 @@
 				return date;
 			},
 
-			// Обертка над запросом которая позваляет "продавливать" переданные параметры в объект xhr который приходит в метод parse модели или коллекции.
+			// Обертка над запросом которая позваляет "продавливать" переданные параметры
+			// в объект xhr который приходит в метод parse модели или коллекции.
 			requestWraper: function(target, method, data, params) {
+				this._req || (this._req = {});
+
 				if (target && method && target[method] && typeof(target[method]) === 'function') {
 					data || (data = {});
 					params || (params = {});
@@ -141,6 +140,22 @@
 					target.action = params.action;
 					xhr = target[method].apply(target, arguments);
 
+					// Если передан этот параметр то под его значением мы сохраняем запрос
+					// в коллекцию и при повторном вызове запроса с таким значение сбросит
+					// старый запрос сохраненный в коллекции записав на его место новый
+					if (params.uniqueness) {
+						var req = this._req[params.uniqueness];
+
+						req || (req = {});
+
+						if (req.abort && typeof(req.abort) === 'function') {
+							req.abort();
+						}
+						this._req[params.uniqueness] = xhr;
+					}
+
+					// Если передан параметр appendData, то объект data будет слинкован
+					// с объектом sendedData в объекте xhr
 					if (params.appendData) {
 						extendData.sendedData = data;
 						delete params.appendData;
