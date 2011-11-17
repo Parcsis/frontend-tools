@@ -379,7 +379,7 @@
 				var list = viewName ? [viewName] : this.list;
 
 				this.locationBlock = YES;
-				$(this.list).each(function(i, name) {
+				$(list).each(function(i, name) {
 					var object = this.get(name),
 						view = object.view;
 
