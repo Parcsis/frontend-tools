@@ -130,14 +130,55 @@
 					params || (params = {});
 
 					var options = params.options || {},
+						arguments = [data],
 						extendData = {},
 						xhr = null,
-						arguments = [data, options];
+						beatTheHeart = function() {
+							if (this.heartbeatState && this.startHeartbeat && typeof(this.startHeartbeat) === 'function') {
+								this.stopHeartbeat();
+								this._heartbeatTimer = setTimeout(function() {
+									this.startHeartbeat();
+									beatTheHeart();
+								}.bind(this), this.heartbeatTimout * 1000 * 60); // Время указывается в минутах
+							}
+						}.bind(this);
+
+					// Если обработчик метода complete не был передан, то заменяем его на функцию-пустышку
+					options.complete || (options.complete = function() {});
+
+					// Делаем обертки для методов success и error чтоб после окончания запроса
+					// можно было запустить "биение сердца"
+					if (options.complete && typeof(options.complete) === 'function') {
+						var oldComplete = options.complete;
+
+						options.complete = function(xhr, textStatus) {
+							oldComplete.apply(this, arguments);
+
+							// Как бы не закончился запрос (ошибкой или успехом) запускаем
+							// "биение сердца" для поддержания сессии
+							beatTheHeart();
+
+							if (textStatus != 'success') {
+								// Если статус запроса вернулся отличным от success, то значит
+								// произошла какая-то ошибка и нужно вывести сообщение об этом
+								//
+								// [TODO] Как только будет сделана передача ошибко в шаблоны заменить
+								//        на выдачу правильных ошибок
+								alert('Request ' + (xhr && xhr.userData && xhr.userData.action ? '"' + xhr.userData.action + '" ' : '') + 'finished with ' + textStatus);
+							}
+						}
+					}
+					options.timeout || (options.timeout = 3 * 1000 * 60); // таймаут ожидания в минутах (3 мин)
+
+					// Добавляем обработанные опции в список аргументов
+					arguments.push(options);
 
 					if (method == 'fetch') {
 						arguments.shift();
 					}
 					target.action = params.action;
+
+					// Выполняем запрос с параметрами
 					xhr = target[method].apply(target, arguments);
 
 					// Если передан этот параметр то под его значением мы сохраняем запрос
