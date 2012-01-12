@@ -1,0 +1,25 @@
+* {
+	margin: 0;
+	padding: 0;
+}
+
+html,
+body {
+	height: 100%;
+}
+
+.l-layout {
+	height: 100%;
+	background: #eee;
+}
+.l-header {
+	height: 40px;
+	background: #ccc;
+}
+.l-body {
+	background: #ddd;
+}
+.l-footer {
+	height: 40px;
+	background: #000;
+}
