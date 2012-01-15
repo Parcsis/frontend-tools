@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ru">
+	<head>
+		<title>Header, Content, Footer Layout</title>
+		<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+		<meta content="IE=7" http-equiv="X-UA-Compatible">
+		<meta content="width=device-width" name="viewport">
+		<meta content="ru_RU" http-equiv="Content-Language">
+		<meta content="text/javascript" http-equiv="Content-Script-Type">
+
+		<meta content="text/css" http-equiv="Content-Style-Type">
+		<link href="/" rel="home">
+
+		<link href="css/main.css" type="text/css" rel="stylesheet" />
+		<script type="text/javascript" src="js/jquery.js"></script>
+		<script type="text/javascript" src="js/hcf-layout.js"></script>
+		<script type="text/javascript">
+			$(function() {
+				var hcf = new HCF({
+					header: '#l-header',
+					contents: '#l-body',
+					footer: '#l-footer'
+				});
+			});
+		</script>
+	</head>
+	<body>
+		<div class="l-layout">
+			<div id="l-header" class="l-header">
+				<div class="l-indent">
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ante arcu, posuere non mollis at, consectetur non enim. Nam dignissim fringilla nisi, a tincidunt metus blandit quis. Aliquam non nunc mauris, sed facilisis ante. Nullam iaculis nisl quis metus semper bibendum volutpat dui bibendum. Nunc nisi nibh, congue sit amet dictum elementum, laoreet a nisl. Donec ut libero vitae elit viverra dignissim quis sit amet quam. Aliquam ultrices dui in nisi molestie ac adipiscing libero vulputate. Fusce pellentesque, elit nec feugiat vulputate, erat justo posuere metus, commodo tristique tellus metus vel risus. Nam nisl mauris, commodo sit amet sollicitudin in, pharetra ut metus.
+				</div>
+			</div>
+			<div id="l-body" class="l-body">
+				<div class="l-indent">
+					<p>Mauris rutrum leo sit amet eros feugiat mollis. Nam elementum feugiat velit, eget pretium diam consequat ac. Praesent at dolor at est pellentesque ullamcorper. Duis euismod arcu erat, eu mattis leo. Phasellus libero odio, mollis pharetra vulputate nec, suscipit ut magna. Donec orci sem, condimentum nec bibendum in, eleifend quis odio. Proin sit amet lacus nec erat mollis gravida. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Curabitur in mollis felis. Phasellus eleifend, nunc quis ultrices tempor, est lacus semper sem, quis tincidunt risus urna sit amet ipsum. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Vestibulum a lacinia eros. Donec elementum, lorem eget vehicula ullamcorper, quam felis fermentum arcu, vitae tempus tortor metus et leo. Vivamus pretium nibh iaculis libero elementum volutpat. Cras iaculis dictum sem id egestas. Donec ac viverra nunc.</p>
+					<p>Donec hendrerit, neque eget varius pulvinar, magna enim ultricies mauris, eu pretium diam velit eu diam. Mauris tincidunt bibendum velit, ac interdum sapien vulputate eget. Aenean ut massa elit. Nulla facilisi. Quisque at nisl non velit laoreet gravida. Integer sem sapien, suscipit iaculis posuere vulputate, dictum et eros. Nam quis facilisis dui. Maecenas ac justo interdum leo fermentum dapibus.</p>
+					<p>Vestibulum commodo semper eleifend. Aenean posuere ornare enim quis bibendum. Nulla semper interdum odio at accumsan. Nunc tincidunt vehicula justo vitae sollicitudin. Ut facilisis ante nunc. Sed non neque sit amet erat gravida ornare. Integer nisi est, imperdiet nec vulputate vel, porttitor nec metus.</p>
+				</div>
+			</div>
+			<div id="l-footer" class="l-footer">
+				<div class="l-indent">
+					Praesent eget mauris non arcu condimentum rutrum. Quisque vel orci ante, vitae porta quam. Maecenas tincidunt neque a magna eleifend lacinia. Praesent iaculis felis id libero pulvinar consectetur. Phasellus suscipit vehicula felis. Nam non dui neque. Nulla ut elit non arcu suscipit imperdiet. Donec in bibendum nunc.
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

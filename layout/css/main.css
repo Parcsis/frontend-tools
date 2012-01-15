@@ -7,19 +7,40 @@ html,
 body {
 	height: 100%;
 }
+body {
+	font: 0.9375em Arial,Helvetica,sans-serif;
+}
 
 .l-layout {
+	font-size: .8em;
+	line-height: 1.666em;
 	height: 100%;
 	background: #eee;
 }
+
 .l-header {
-	height: 40px;
+	min-height: 40px;
 	background: #ccc;
 }
+
 .l-body {
 	background: #ddd;
+	overflow-y: auto;
+	overflow-x: hidden;
 }
+.l-body p {
+	margin-top: 10px;
+}
+.l-body .l-indent {
+	padding-top: 0;
+}
+
 .l-footer {
-	height: 40px;
+	color: #fff;
+	min-height: 40px;
 	background: #000;
+}
+
+.l-indent {
+	padding: 10px;
 }
