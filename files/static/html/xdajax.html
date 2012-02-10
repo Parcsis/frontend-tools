@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+	<head>
+		<script type="text/javascript" src="../js/libs/xdomain/easyXDM.min.js"></script>
+		<script type="text/javascript">
+			easyXDM.DomHelper.requiresJSON("../js/libs/json2.js");
+		</script>
+		<script type="text/javascript">
+			function isHostMethod(a,f){var d=typeof a[f];return"function"==d||!!("object"==d&&a[f])||"unknown"==d}
+var getXhr=function(){if(isHostMethod(window,"XMLHttpRequest"))return function(){return new XMLHttpRequest};var a=function(){for(var f=["Microsoft","Msxml2","Msxml3"],d=f.length;d--;)try{return a=f[d]+".XMLHTTP",new ActiveXObject(a),a}catch(l){}}();return function(){return new ActiveXObject(a)}}(),useAccessControl=!1,alwaysTrustedOrigins=[/\.?easyxdm\.net/,/xdm1/],remote=new easyXDM.Rpc({local:"name.html",swf:"../swf/easyxdm.swf"},{local:{request:function(a,f,d){easyXDM.apply(a,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded",
+"X-Requested-With":"XMLHttpRequest"},success:Function.prototype,error:function(a){throw Error(a);},data:{},timeout:1E4},!0);var l="POST"==a.method,e=[],h;for(h in a.data)a.data.hasOwnProperty(h)&&e.push(encodeURIComponent(h)+"="+encodeURIComponent(a.data[h]));var e=e.join("&"),b=getXhr();b.open(a.method,a.url+(l?"":"?"+e),!0);for(var c in a.headers)a.headers.hasOwnProperty(c)&&a.headers[c]&&b.setRequestHeader(c,a.headers[c]);var m;m=setTimeout(function(){b.abort();d({message:"timeout after "+a.timeout+
+" second",status:0,data:null,toString:function(){return this.message+" Status: "+this.status}},null)},a.timeout);var i=!1;for(c=alwaysTrustedOrigins.length;c--&&!i;)alwaysTrustedOrigins[c]instanceof RegExp?i=alwaysTrustedOrigins[c].test(remote.origin):"string"==typeof alwaysTrustedOrigins[c]&&(i=remote.origin===alwaysTrustedOrigins[c]);b.onreadystatechange=function(){if(4==b.readyState){clearTimeout(m);for(var c=b.getAllResponseHeaders(),e={},g={},h=/([\w-_]+):\s+(.*)$/gm,j;j=h.exec(c);)g[j[1].toLowerCase()]=
+e[j[1]]=j[2];if(200>b.status||300<=b.status)useAccessControl?d("INVALID_STATUS_CODE"):d("INVALID_STATUS_CODE",{status:b.status,data:b.responseText});else{var k;useAccessControl&&(c=(g["access-control-allow-origin"]||"").replace(/\s/g,""),g=(g["access-control-allow-methods"]||"").replace(/\s/g,""),i||"*"==c||-1!=c.indexOf(remote.origin)?g&&"*"!=g&&-1==g.indexOf(a.method)&&(k="DISALLOWED_REQUEST_METHOD"):k="DISALLOWED_ORIGIN");k?d(k):f({data:b.responseText,status:b.status,headers:e})}b.onreadystatechange=
+Function.prototype;b=null}};b.send(l?e:"")}}});
+		</script>
+	</head>
+	<body>
+	</body>
+</html>
