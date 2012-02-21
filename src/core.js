@@ -283,6 +283,59 @@
 				}
 			},
 
+			// Метод-обертка, который делает задержку между получением данных из вью-модели и отправкой их 
+			// в шаблонизатор, что позволит сделать увеличить максимальное время скрипта без вывода сообщения
+			// о том что скрипт перестал отвечать.
+			// 
+			// Необходимые условия:
+			//     1) renderHandler - метод, который выполняет отрисовку должен принимать данные в качестве 
+			//        параметра и без обработки их отправлять в шаблонизатор;
+			//     2) dataSourceHandler - метод, который получает из источника данных сформированный объект
+			//        подготовленный для отрисовки.
+			// 
+			// params: {
+			//     renderContext - контекст вызова (scope) метода renderHandler;
+			//     renderArguments - массив аргументов которые должны быть переданы в метод renderHandler 
+			//         помимо объекта с данными. Например: renderArguments = [a, b], тогда в полный набор 
+			//         аргументов переданные в renderHandler будет [data, a, b];
+			//     dataSourceContext - контекст вызова (scope) метода dataSourceHandler;
+			//     dataSourceArguments - массив аргументов которые будут переданны в метод dataSourceHandler;
+			//     beforeRenderCallback - метод, который будет вызван непосредственно до вызова метода 
+			//         renderHandler;
+			//     afterRenderCallback - метод, который будет вызван непосредственно после вызова метода
+			//         renderHandler;
+			//     afterRenderDefferedCallback - метод, который будет вызван через 100мс после вызова метода
+			//         renderHandler;
+			// }
+			defferedViewRender: function(renderHandler, dataSourceHandler, params) {
+				params || (params = {});
+
+				if (renderHandler && typeof(renderHandler) === 'function' && dataSourceHandler && typeof(dataSourceHandler) === 'function') {
+					var data = dataSourceHandler.apply(params.dataSourceContext || this, params.dataSourceArguments || []),
+						renderArguments = [data];
+
+					setTimeout(function() {
+						if (params.beforeRenderCallback && typeof(params.beforeRenderCallback) === 'function') {
+							params.beforeRenderCallback();
+						}
+						renderHandler.apply(params.renderContext || this, renderArguments.concat(params.renderArguments || []));
+
+						if (params.afterRenderCallback && typeof(params.afterRenderCallback) === 'function') {
+							params.afterRenderCallback();
+						}
+
+						if (params.afterRenderDefferedCallback && typeof(params.afterRenderDefferedCallback) === 'function') {
+							setTimeout(function() {
+								params.afterRenderDefferedCallback();
+							}, 100);
+						}
+					}.bind(this), 100);
+				} else {
+					return NO;
+				}
+				return YES;
+			},
+
 			navigate: function(hash, triggerRoute) {
 				!this.locationBlock && this.router.navigate(hash, triggerRoute);
 				return this;
@@ -469,7 +522,7 @@
 
 				data.render = this.render.bind(this);
 
-				if (data && ((data._view && !data.standalone) || (data.standalone && !data.view))) {
+				if (data && data._view && !data.view) {
 					if (data.multiple) {
 						var tmpName = name + Math.floor(Math.random() * 10000),
 							dummyBundle = $.extend({}, data);
@@ -484,6 +537,41 @@
 				return data;
 			},
 
+			// Метод позволяющий передавать массив имен бандлов с параметрами или без к которым при 
+			// отрисовке будут примен общий набор параметров
+			// 
+			// Пример #1:
+			// Core.renderStream(['Menu', 'Content', 'Footer'], {
+			//     context: 'agent'
+			// });
+			// 
+			// Пример #2:
+			// Core.renderStream([{
+			//     name: 'Menu',
+			//     params: {
+			//         params: params,
+			//         value: value
+			//     }
+			// }, 'Content', 'Footer'], {
+			//     context: 'agent'
+			// });
+			// 
+			renderStream: function(bandlesList, params) {
+				params || (params = {});
+
+				$.each(bandlesList, function(i, bandle) {
+					var name = '';
+
+					if (bandle && typeof(bandle) === 'string') {
+						name = bandle;
+					} else if ('name' in bandle) {
+						name = bandle.name;
+					}
+					this.render(name, $.extend({}, params, bandle.params));
+				}.bind(this));
+				return this;
+			},
+
 			get: function(name) {
 				return this['__' + name] || {
 					multiple: NO,
@@ -493,14 +581,25 @@
 			},
 
 			unload: function(viewName) {
-				var list = viewName ? [viewName] : this.list;
+				var list = viewName ? [viewName] : this.list,
+					currentHashUrl = window.location.hash.replace('/', '');
 
 				this.locationBlock = YES;
-				$(list).each(function(i, name) {
+				$.each(list, function(i, name) {
 					var object = this.get(name),
+						isStandalone = !!object.standalone,
 						view = object.view;
 
-					if (view && (!object.standalone || !!viewName)) {
+					if (isStandalone && 'push' in object.standalone) {
+						$.each(object.standalone, function(j, route) {
+							if (currentHashUrl.indexOf(route.replace('/', '')) >= 0) {
+								isStandalone = YES;
+								return NO;
+							}
+						});
+					}
+
+					if (view && (!isStandalone || !!viewName)) {
 						view.remove();
 						delete this['__' + name].view;
 					}
