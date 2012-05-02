@@ -4,6 +4,9 @@ var HCF = function(options) {
 	options || (options = {});
 
 	// Задаем значения по умолчанию
+	this.header = null;
+	this.contents = null;
+	this.footer = null;
 	this.options = options;
 	this.headerHeight = this.footerHeight = 0;
 	this.hasHeightTable = false;
@@ -16,7 +19,12 @@ var HCF = function(options) {
 
 	// Возвращаем объект с набором доступных для пользователя методов
 	return {
-		recheck: this.getFn('recheck')
+		recheck: this.getFn('recheck'),
+		elements: {
+			header: this.header,
+			contents: this.contents,
+			footer: this.footer
+		}
 	}
 };
 
