@@ -7,8 +7,15 @@ html,
 body {
 	height: 100%;
 }
+
+html {
+	overflow-y: hidden;
+}
+
 body {
 	font: 0.9375em Arial,Helvetica,sans-serif;
+	min-width: 1000px;
+	overflow-y: auto;
 }
 
 .l-layout {

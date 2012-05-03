@@ -116,7 +116,8 @@ HCF.prototype = {
 		var header = this.header,
 			headerHeight = header.outerHeight(),
 			footer = this.footer,
-			footerHeight = footer.outerHeight();
+			footerHeight = footer.outerHeight(),
+			isMinWidth = $(window).width() < header.width();
 
 		// Проверяем поддержку mq браузером
 		if (this.isSupportMQ) {
@@ -129,6 +130,11 @@ HCF.prototype = {
 
 			if (!this.footerHeight || this.footerHeight != footerHeight) {
 				this.footerHeight = footerHeight;
+				this.removeHeightTable();
+			}
+
+			if (!this.isMinWidth || this.isMinWidth != isMinWidth) {
+				this.isMinWidth = isMinWidth;
 				this.removeHeightTable();
 			}
 		} else {
@@ -155,6 +161,24 @@ HCF.prototype = {
 			// Получаем селекторы для блоков контентной части
 			var selectors = typeof(this.options.contents) === 'string' ? this.options.contents : ('join' in this.options.contents ? this.options.contents.join(', ') : false),
 				styles = '';
+
+			// Если Mozilla, IE или Opera > 11, то в media queries учитываем высоту скроллбара
+			if (($.browser.mozilla || ($.browser.opera && $.browser.version > 11) || $.browser.msie) && this.isMinWidth) {
+				// Считаем высоту скроллбара
+				if (!this.scrollbarHeight) {
+					var html = $('html'),
+						body = $('body'),
+						bodyHeight;
+
+					html.css('overflowX', 'hidden');
+					bodyHeight = body.height();
+					html.css('overflowX', 'scroll')
+					this.scrollbarHeight = bodyHeight - body.height();
+					html.css('overflowX', '');
+				}
+
+				diffHeight += this.scrollbarHeight;
+			}
 
 			// Если селекторы были получены, то генерируем таблицу стилей
 			if (selectors) {
